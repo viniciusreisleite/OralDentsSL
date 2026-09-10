@@ -1,0 +1,219 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mural Oral Dents</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body, html {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background-color: #0d0d0d;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+    .tv-container {
+      display: flex;
+      width: 100vw;
+      height: 100vh;
+      padding: 1.5rem;
+      gap: 1.5rem;
+      box-sizing: border-box;
+      background-color: #0d0d0d;
+    }
+    .video-section {
+      height: 100% !important;
+      background: #000 !important;
+      border-radius: 24px !important;
+      overflow: hidden !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7) !important;
+      border: 1px solid rgba(255, 255, 255, 0.1) !important;
+      position: relative !important;
+    }
+    .tv-container.is-video .video-section {
+      flex: 0 0 auto !important;
+      aspect-ratio: 9 / 16 !important;
+    }
+    .tv-container.is-video video {
+      width: 100% !important;
+      height: 100% !important;
+      object-fit: contain !important;
+      background: #000 !important;
+      border-radius: 20px !important;
+      }
+    .tv-container.is-image .video-section {
+      flex: 0 0 auto !important;
+      width: fit-content !important;
+      max-width: 50vw !important;
+      background: #000 !important;
+    }
+    .tv-container.is-image #image-player {
+      width: auto !important;
+      height: 100% !important;
+      max-width: 100% !important;
+      object-fit: contain !important;
+      border-radius: 20px !important;
+      }
+    .info-section {
+      flex: 1 !important;
+      height: 100% !important;
+      max-height: 100% !important;
+      display: flex !important;
+      flex-direction: column !important;
+      padding: 2.5rem 3rem !important;
+      background-color: #141414;
+      color: #fff;
+      overflow: hidden !important;
+      position: relative !important;
+      box-sizing: border-box !important;
+      border-radius: 24px !important;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    }
+    .header-box {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 1.5rem;
+      flex-shrink: 0;
+    }
+    .badge {
+      background: #e5c158;
+      color: #000;
+      padding: 4px 12px;
+      border-radius: 6px;
+      font-size: 0.9vw;
+      font-weight: 700;
+      display: inline-block;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+    }
+    .brand-title {
+      color: #ffffff;
+      font-size: 2vw;
+      font-weight: 800;
+      letter-spacing: 1px;
+    }
+    .brand-logo {
+      max-height: 60px;
+      max-width: 130px;
+      object-fit: contain;
+    }
+    .caption-scroll-wrapper {
+      flex: 1;
+      overflow: hidden;
+      position: relative;
+    }
+    .caption-box, #caption-text {
+      color: #ffffff !important;
+      font-weight: 600 !important;
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8) !important;
+      font-size: 2.1vw !important;
+      line-height: 1.45 !important;
+      white-space: pre-line !important;
+      display: block;
+    }
+    .animar-rolagem {
+      animation: rolarTexto 24s ease-in-out infinite alternate !important;
+    }
+    @keyframes rolarTexto {
+      0%, 20% {
+        transform: translateY(0);
+      }
+      80%, 100% {
+        transform: translateY(var(--scroll-limit, -30%));
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="tv-container is-image" id="main-container">
+    <div class="video-section">
+      <img id="image-player" style="display:none;" />
+      <video id="player" autoplay playsinline muted loop style="display:none;"></video>
+    </div>
+    <div class="info-section">
+      <div class="header-box">
+        <div>
+          <div class="badge">1º C.T DE MUSCULAÇÃO DE SÃO LOURENÇO-MG</div>
+          <div class="brand-title">CONCEPT CT</div>
+        </div>
+        <img src="logo.png" class="brand-logo" alt="Logo">
+      </div>
+      <div class="caption-scroll-wrapper" id="scroll-wrapper">
+        <div id="caption-text">Carregando informações...</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      var mainContainer = document.getElementById('main-container');
+      var scrollWrapper = document.getElementById('scroll-wrapper');
+      var captionElem = document.getElementById('caption-text');
+      var imgElem = document.getElementById('image-player');
+      var videoElem = document.getElementById('player');
+
+      var params = new URLSearchParams(window.location.search);
+      var postParam = parseInt(params.get('post'), 10);
+
+      fetch('data.json?v=' + Date.now())
+        .then(function(res) { return res.json(); })
+        .then(function(posts) {
+          if (!posts || posts.length === 0) return;
+
+          var postIndex = 0;
+          if (!isNaN(postParam) && postParam >= 1) {
+            postIndex = (postParam - 1) % posts.length;
+          }
+          var post = posts[postIndex];
+
+          captionElem.textContent = post.caption || '';
+
+          setTimeout(function() {
+            var diferenca = captionElem.scrollHeight - scrollWrapper.clientHeight;
+            if (diferenca > 20) {
+              var deslocamento = -(diferenca + 30);
+              captionElem.style.setProperty('--scroll-limit', deslocamento + 'px');
+              captionElem.classList.add('animar-rolagem');
+            } else {
+              captionElem.classList.remove('animar-rolagem');
+            }
+          }, 400);
+
+          if (post.type === 'video' || (post.media && post.media.endsWith('.mp4'))) {
+            mainContainer.className = 'tv-container is-video';
+            imgElem.style.display = 'none';
+            videoElem.src = post.media;
+            videoElem.style.display = 'block';
+            videoElem.play().catch(function() {});
+          } else {
+            mainContainer.className = 'tv-container is-image';
+            videoElem.pause();
+            videoElem.removeAttribute('src');
+            videoElem.style.setProperty('display', 'none', 'important');
+
+            imgElem.onload = function() {
+              imgElem.style.display = 'block';
+            };
+            imgElem.onerror = function() {
+              setTimeout(function() { imgElem.src = post.media + '?retry=' + Date.now(); }, 3000);
+            };
+            imgElem.src = post.media;
+          }
+        })
+        .catch(function() {
+          captionElem.textContent = "Erro ao carregar dados do mural.";
+        });
+    });
+  </script>
+</body>
+</html>
